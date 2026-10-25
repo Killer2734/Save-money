@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#176b57">
+<meta name="description" content="แอปจดรายรับรายจ่าย วางแผนงบประมาณ และกระเป๋าเงินออม">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>กระเป๋าเงินของฉัน</title>
+<style>
+:root{--green:#176b57;--green2:#e4f4ed;--red:#c53d4b;--bg:#f5f7f6;--card:#fff;--text:#1f2925;--muted:#6c7772;--line:#e4e9e6}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--text)}button,input,select{font:inherit}button{cursor:pointer;border:0;border-radius:10px;padding:10px 13px;background:var(--green);color:#fff;font-weight:650}button.secondary{background:#eef2ef;color:#26342e}button.danger{background:#fff0f1;color:var(--red)}input,select{width:100%;padding:11px;border:1px solid #d8e0db;border-radius:10px;background:white;min-width:0}label{display:block;font-size:13px;color:var(--muted);margin:0 0 5px}.app{max-width:1100px;margin:auto;padding:16px}.top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}.brand{display:flex;align-items:center;gap:10px}.logo{width:42px;height:42px;border-radius:13px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:22px}.brand h1{font-size:21px;margin:0}.brand p{margin:2px 0 0;color:var(--muted);font-size:13px}.tabs{display:flex;gap:6px;overflow:auto;margin:12px 0 18px;padding-bottom:4px}.tab{white-space:nowrap;background:#e9efeb;color:#405047}.tab.active{background:var(--green);color:white}.grid{display:grid;grid-template-columns:repeat(12,1fr);gap:14px}.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;box-shadow:0 2px 8px #183d2910;min-width:0}.span-12{grid-column:span 12}.span-8{grid-column:span 8}.span-7{grid-column:span 7}.span-6{grid-column:span 6}.span-5{grid-column:span 5}.span-4{grid-column:span 4}.stat{display:flex;flex-direction:column;gap:6px}.stat .label{color:var(--muted);font-size:13px}.stat strong{font-size:24px;overflow-wrap:anywhere}.income{color:var(--green)}.expense{color:var(--red)}h2{font-size:17px;margin:0 0 14px}h3{font-size:15px;margin:0 0 10px}.muted{color:var(--muted);font-size:13px}.formgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.full{grid-column:1/-1}.row{display:flex;align-items:center;justify-content:space-between;gap:10px}.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}.list{display:flex;flex-direction:column}.item{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line)}.item:last-child{border-bottom:0}.itemname{font-weight:650}.pill{display:inline-block;padding:4px 8px;border-radius:99px;background:#eef2ef;color:#4c5b52;font-size:12px}.bar{height:9px;background:#edf1ee;border-radius:99px;overflow:hidden;margin:8px 0}.bar>i{display:block;height:100%;background:var(--green);border-radius:99px}.wallet{border:1px solid var(--line);border-radius:12px;padding:13px;margin:8px 0}.wallet strong{font-size:19px}.wallet .bar>i{background:#4a9b7f}.empty{padding:20px;text-align:center;color:var(--muted);font-size:14px}.notice{padding:11px 12px;border-radius:10px;background:#fff7df;color:#75591a;font-size:13px;margin-bottom:14px}.hidden{display:none!important}canvas{width:100%;height:230px;display:block}.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;font-size:13px}th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap}th{color:var(--muted);font-weight:600}.right{text-align:right}.small{font-size:12px}.foot{padding:18px 2px;color:var(--muted);font-size:12px;text-align:center}
+@media(max-width:700px){.app{padding:12px}.span-8,.span-7,.span-6,.span-5,.span-4{grid-column:span 12}.brand h1{font-size:19px}.stat strong{font-size:21px}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.top button{padding:9px 10px}.card{padding:14px}}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="top">
+ <div class="brand"><div class="logo">฿</div><div><h1>กระเป๋าเงินของฉัน</h1><p>รายรับ · รายจ่าย · งบประมาณ · เงินออม</p></div></div>
+ <div class="actions" style="margin:0"><button id="installBtn" class="secondary hidden">ติดตั้งแอป</button><button id="exportBtn">ส่งออก CSV</button></div>
+</header>
+<div class="notice" id="cloudNotice">โหมดออฟไลน์: ข้อมูลเก็บไว้ในอุปกรณ์นี้ก่อน หากต้องการซิงก์หลายเครื่อง ต้องเชื่อมต่อฐานข้อมูลออนไลน์เพิ่มเติม</div>
+<nav class="tabs">
+ <button class="tab active" data-page="dashboard">ภาพรวม</button><button class="tab" data-page="transactions">รายการเงิน</button><button class="tab" data-page="budget">งบประมาณ</button><button class="tab" data-page="wallets">กระเป๋าเงินออม</button><button class="tab" data-page="settings">ตั้งค่า/สำรองข้อมูล</button>
+</nav>
+
+<section id="page-dashboard" class="page">
+ <div class="row" style="margin-bottom:12px"><h2 style="margin:0">ภาพรวมการเงิน</h2><div style="max-width:190px"><input type="month" id="dashMonth"></div></div>
+ <div class="grid">
+  <div class="card span-4 stat"><span class="label">รายรับเดือนนี้</span><strong class="income" id="totalIncome">฿0.00</strong></div>
+  <div class="card span-4 stat"><span class="label">รายจ่ายเดือนนี้</span><strong class="expense" id="totalExpense">฿0.00</strong></div>
+  <div class="card span-4 stat"><span class="label">เงินสุทธิเดือนนี้</span><strong id="netTotal">฿0.00</strong></div>
+  <div class="card span-7"><h2>รายรับเทียบรายจ่าย</h2><canvas id="chart" width="600" height="260" aria-label="กราฟรายรับเทียบรายจ่าย"></canvas><p class="muted">กราฟสรุปตามเดือนที่เลือก</p></div>
+  <div class="card span-5"><h2>งบประมาณที่ใช้ไป</h2><div id="budgetSummary"></div></div>
+  <div class="card span-6"><h2>รายการล่าสุด</h2><div id="recentList" class="list"></div></div>
+  <div class="card span-6"><h2>กระเป๋าเงินออม</h2><div id="walletSummary"></div><button class="secondary" data-goto="wallets">จัดการเงินออม</button></div>
+ </div>
+</section>
+
+<section id="page-transactions" class="page hidden">
+ <div class="grid">
+  <div class="card span-5"><h2>เพิ่มรายการ</h2>
+   <form id="txForm"><div class="formgrid">
+    <div><label for="txType">ประเภท</label><select id="txType"><option value="expense">รายจ่าย</option><option value="income">รายรับ</option></select></div>
+    <div><label for="txAmount">จำนวนเงิน (บาท)</label><input id="txAmount" type="number" min="0.01" step="0.01" required placeholder="เช่น 120"></div>
+    <div><label for="txCategory">หมวดหมู่</label><select id="txCategory"></select></div>
+    <div><label for="txDate">วันที่</label><input id="txDate" type="date" required></div>
+    <div class="full"><label for="txNote">รายละเอียด</label><input id="txNote" maxlength="120" placeholder="เช่น ข้าวกลางวัน"></div>
+    <div class="full"><label for="txWallet">เกี่ยวข้องกับกระเป๋าเงิน (ไม่บังคับ)</label><select id="txWallet"><option value="">ไม่ระบุ</option></select></div>
+   </div><div class="actions"><button type="submit">บันทึกรายการ</button><button type="reset" class="secondary">ล้างฟอร์ม</button></div></form>
+  </div>
+  <div class="card span-7"><div class="row"><h2>ประวัติรายการ</h2><span id="txCount" class="pill">0 รายการ</span></div>
+   <div class="formgrid" style="margin-bottom:12px"><div><label>ค้นหา</label><input id="searchTx" placeholder="ค้นหารายละเอียด/หมวดหมู่"></div><div><label>กรองประเภท</label><select id="filterType"><option value="">ทั้งหมด</option><option value="income">รายรับ</option><option value="expense">รายจ่าย</option></select></div></div>
+   <div class="tablewrap"><table><thead><tr><th>วันที่/รายละเอียด</th><th>ประเภท</th><th class="right">จำนวน</th><th></th></tr></thead><tbody id="txTable"></tbody></table></div>
+  </div>
+ </div>
+</section>
+
+<section id="page-budget" class="page hidden">
+ <div class="grid">
+  <div class="card span-5"><h2>ตั้งงบประมาณรายเดือน</h2><form id="budgetForm"><div class="formgrid">
+   <div class="full"><label>หมวดหมู่รายจ่าย</label><select id="budgetCategory"></select></div>
+   <div><label>วงเงิน (บาท)</label><input id="budgetAmount" type="number" min="1" step="1" required placeholder="เช่น 3000"></div>
+   <div><label>เดือนที่ใช้</label><input id="budgetMonth" type="month" required></div>
+  </div><div class="actions"><button>บันทึกงบประมาณ</button></div></form></div>
+  <div class="card span-7"><h2>สรุปงบประมาณ</h2><div id="budgetList"></div></div>
+ </div>
+</section>
+
+<section id="page-wallets" class="page hidden">
+ <div class="grid">
+  <div class="card span-5"><h2>สร้างกระเป๋าเงินออม</h2><form id="walletForm"><div class="formgrid">
+   <div class="full"><label>ชื่อกระเป๋า</label><input id="walletName" maxlength="50" required placeholder="เช่น เงินฉุกเฉิน"></div>
+   <div><label>เป้าหมายเงินออม (บาท)</label><input id="walletGoal" type="number" min="0" step="0.01" value="0"></div>
+   <div><label>ยอดเริ่มต้น (บาท)</label><input id="walletStart" type="number" min="0" step="0.01" value="0"></div>
+   <div class="full"><label>คำอธิบาย (ไม่บังคับ)</label><input id="walletDesc" maxlength="100" placeholder="เช่น เก็บไว้เที่ยว"></div>
+  </div><div class="actions"><button>สร้างกระเป๋า</button></div></form>
+  <hr style="border:0;border-top:1px solid var(--line);margin:18px 0"><h3>ฝาก/ถอนเงินออม</h3><form id="walletMoveForm"><div class="formgrid">
+   <div class="full"><label>เลือกกระเป๋า</label><select id="moveWallet" required></select></div>
+   <div><label>การทำรายการ</label><select id="moveType"><option value="deposit">ฝากเงินเข้า</option><option value="withdraw">ถอนเงินออก</option></select></div>
+   <div><label>จำนวนเงิน (บาท)</label><input id="moveAmount" type="number" min="0.01" step="0.01" required></div>
+   <div class="full"><label>หมายเหตุ</label><input id="moveNote" maxlength="100" placeholder="เช่น เก็บจากค่าขนม"></div>
+  </div><div class="actions"><button>ยืนยันรายการ</button></div></form></div>
+  <div class="card span-7"><h2>กระเป๋าเงินทั้งหมด</h2><div id="walletList"></div><h2 style="margin-top:20px">ประวัติฝาก/ถอน</h2><div id="walletMoves"></div></div>
+ </div>
+</section>
+
+<section id="page-settings" class="page hidden">
+ <div class="grid">
+  <div class="card span-6"><h2>สำรองและกู้คืนข้อมูล</h2><p class="muted">สำรองข้อมูลทั้งหมดเป็นไฟล์ JSON เพื่อย้ายเครื่องหรือกู้คืนในภายหลัง</p><div class="actions"><button id="backupBtn">ดาวน์โหลดข้อมูลสำรอง</button><label class="secondary" style="padding:10px 13px;border-radius:10px;cursor:pointer;background:#eef2ef;color:#26342e;font-weight:650">นำเข้าข้อมูลสำรอง<input id="importFile" type="file" accept=".json,application/json" hidden></label></div></div>
+  <div class="card span-6"><h2>การตั้งค่า</h2><label>สกุลเงิน</label><select id="currency"><option value="THB">บาทไทย (THB)</option></select><p class="muted">เวอร์ชันนี้ใช้งานได้โดยไม่ต้องสมัครสมาชิก ข้อมูลจะอยู่ในเบราว์เซอร์เครื่องนี้</p><button id="clearBtn" class="danger">ลบข้อมูลทั้งหมด</button></div>
+  <div class="card span-12"><h2>เกี่ยวกับการซิงก์ข้ามอุปกรณ์</h2><p>เวอร์ชันนี้เป็นแอปติดตั้งได้ (PWA) และเก็บข้อมูลในเครื่อง เพื่อให้ซิงก์หลายอุปกรณ์อย่างปลอดภัย จำเป็นต้องเพิ่มระบบยืนยันตัวตนและฐานข้อมูลออนไลน์ เช่น Firebase หรือ Supabase พร้อมตั้งค่าคีย์ของโปรเจกต์จริงก่อน ไม่ควรใส่รหัสผ่านหรือคีย์ส่วนตัวไว้ในไฟล์หน้าเว็บโดยตรง</p></div>
+ </div>
+</section>
+<div class="foot">ข้อมูลส่วนตัวของคุณ · ควรสำรองข้อมูลเป็นระยะ</div>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const expCats=['อาหาร','เดินทาง','ที่พัก/ค่าน้ำไฟ','ซื้อของ','การเรียน','สุขภาพ','บันเทิง','อื่นๆ'];
+const incCats=['เงินเดือน/ค่าจ้าง','เงินจากครอบครัว','ขายของ','ดอกเบี้ย/ปันผล','อื่นๆ'];
+const today=new Date(); const localDate=d=>{const x=new Date(d.getTime()-d.getTimezoneOffset()*60000);return x.toISOString().slice(0,10)};
+const monthNow=localDate(today).slice(0,7);
+let data=load();
+function blank(){return {transactions:[],budgets:[],wallets:[],moves:[],currency:'THB'}}
+function load(){try{return {...blank(),...JSON.parse(localStorage.getItem('moneyManagerData')||'{}')}}catch(e){return blank()}}
+function save(){localStorage.setItem('moneyManagerData',JSON.stringify(data));render()}
+function money(n){return new Intl.NumberFormat('th-TH',{style:'currency',currency:'THB',maximumFractionDigits:2}).format(Number(n)||0)}
+function esc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function id(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function categoryOptions(){const type=$('txType').value; $('txCategory').innerHTML=(type==='income'?incCats:expCats).map(c=>`<option>${c}</option>`).join('')}
+function populateWallets(){const opts=data.wallets.map(w=>`<option value="${w.id}">${esc(w.name)}</option>`).join('');$('txWallet').innerHTML='<option value="">ไม่ระบุ</option>'+opts;$('moveWallet').innerHTML=opts||'<option value="">สร้างกระเป๋าก่อน</option>'}
+function monthTx(m){return data.transactions.filter(t=>t.date.startsWith(m))}
+function walletBalance(w){return Number(w.start||0)+data.moves.filter(m=>m.walletId===w.id).reduce((s,m)=>s+(m.type==='deposit'?1:-1)*Number(m.amount),0)}
+function spent(cat,m){return monthTx(m).filter(t=>t.type==='expense'&&t.category===cat).reduce((s,t)=>s+Number(t.amount),0)}
+function budgetHtml(b){let used=spent(b.category,b.month),pct=b.amount?Math.min(100,used/b.amount*100):0;return `<div class="wallet"><div class="row"><strong>${esc(b.category)}</strong><span class="pill">${esc(b.month)}</span></div><div class="row"><span>${money(used)} / ${money(b.amount)}</span><span class="${used>b.amount?'expense':'muted'}">${Math.round(b.amount?used/b.amount*100:0)}%</span></div><div class="bar"><i style="width:${pct}%;${used>b.amount?'background:#c53d4b':''}"></i></div><div class="row"><span class="muted">${used>b.amount?'เกินงบ '+money(used-b.amount):'เหลือ '+money(b.amount-used)}</span><button class="danger small" onclick="deleteBudget('${b.id}')">ลบ</button></div></div>`}
+function render(){
+ const m=$('dashMonth').value||monthNow; const ts=monthTx(m);const income=ts.filter(t=>t.type==='income').reduce((s,t)=>s+ +t.amount,0);const expense=ts.filter(t=>t.type==='expense').reduce((s,t)=>s+ +t.amount,0);
+ $('totalIncome').textContent=money(income);$('totalExpense').textContent=money(expense);$('netTotal').textContent=money(income-expense);$('netTotal').className=(income-expense<0?'expense':'income');
+ const recent=[...data.transactions].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created).slice(0,6);
+ $('recentList').innerHTML=recent.length?recent.map(t=>`<div class="item"><div><div class="itemname">${esc(t.note||t.category)}</div><div class="muted">${esc(t.date)} · ${esc(t.category)}</div></div><strong class="${t.type==='income'?'income':'expense'}">${t.type==='income'?'+':'−'}${money(t.amount)}</strong></div>`).join(''):'<div class="empty">ยังไม่มีรายการ ลองเพิ่มรายรับหรือรายจ่าย</div>';
+ const budgets=data.budgets.filter(b=>b.month===m);$('budgetSummary').innerHTML=budgets.length?budgets.map(b=>budgetHtml(b)).join(''):'<div class="empty">ยังไม่ได้ตั้งงบประมาณเดือนนี้</div>';
+ $('walletSummary').innerHTML=data.wallets.length?data.wallets.slice(0,3).map(w=>`<div class="item"><div><div class="itemname">${esc(w.name)}</div><div class="muted">${w.goal>0?'เป้าหมาย '+money(w.goal):'เงินออม'}</div></div><strong>${money(walletBalance(w))}</strong></div>`).join(''):'<div class="empty">ยังไม่มีกระเป๋าเงินออม</div>';
+ $('txCount').textContent=data.transactions.length+' รายการ';
+ const q=($('searchTx').value||'').toLowerCase(),ft=$('filterType').value;
+ const filtered=[...data.transactions].filter(t=>(!ft||t.type===ft)&&(`${t.note} ${t.category} ${t.date}`).toLowerCase().includes(q)).sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created);
+ $('txTable').innerHTML=filtered.length?filtered.map(t=>`<tr><td><b>${esc(t.note||t.category)}</b><br><span class="muted">${esc(t.date)} · ${esc(t.category)}</span></td><td>${t.type==='income'?'รายรับ':'รายจ่าย'}</td><td class="right ${t.type==='income'?'income':'expense'}">${t.type==='income'?'+':'−'}${money(t.amount)}</td><td><button class="danger small" onclick="deleteTx('${t.id}')">ลบ</button></td></tr>`).join(''):'<tr><td colspan="4" class="empty">ไม่พบรายการ</td></tr>';
+ $('budgetList').innerHTML=data.budgets.length?[...data.budgets].sort((a,b)=>b.month.localeCompare(a.month)).map(b=>budgetHtml(b)).join(''):'<div class="empty">ยังไม่มีงบประมาณ</div>';
+ $('walletList').innerHTML=data.wallets.length?data.wallets.map(w=>{let bal=walletBalance(w),pct=w.goal?Math.min(100,bal/w.goal*100):0;return `<div class="wallet"><div class="row"><div><strong>${esc(w.name)}</strong><div class="muted">${esc(w.desc||'')}</div></div><button class="danger small" onclick="deleteWallet('${w.id}')">ลบ</button></div><div class="row" style="margin-top:10px"><strong>${money(bal)}</strong><span class="muted">${w.goal>0?'เป้าหมาย '+money(w.goal):'ไม่กำหนดเป้าหมาย'}</span></div>${w.goal>0?`<div class="bar"><i style="width:${pct}%"></i></div><div class="muted">สำเร็จ ${Math.round(pct)}%</div>`:''}</div>`}).join(''):'<div class="empty">สร้างกระเป๋าแรกเพื่อเริ่มเก็บเงิน</div>';
+ const moves=[...data.moves].sort((a,b)=>b.date.localeCompare(a.date)||b.created-a.created).slice(0,12);
+ $('walletMoves').innerHTML=moves.length?moves.map(mv=>{let w=data.wallets.find(w=>w.id===mv.walletId);return `<div class="item"><div><div class="itemname">${esc(w?.name||'กระเป๋าที่ถูกลบ')}</div><div class="muted">${esc(mv.date)} · ${esc(mv.note||'')}</div></div><strong class="${mv.type==='deposit'?'income':'expense'}">${mv.type==='deposit'?'+':'−'}${money(mv.amount)}</strong></div>`}).join(''):'<div class="empty">ยังไม่มีประวัติฝาก/ถอน</div>';
+ populateWallets();drawChart(ts);
+}
+function drawChart(ts){const c=$('chart'),ctx=c.getContext('2d'),w=c.width,h=c.height;ctx.clearRect(0,0,w,h);const inc=ts.filter(t=>t.type==='income').reduce((s,t)=>s+ +t.amount,0),exp=ts.filter(t=>t.type==='expense').reduce((s,t)=>s+ +t.amount,0),max=Math.max(inc,exp,1);ctx.font='16px system-ui';ctx.fillStyle='#176b57';ctx.fillText('รายรับ',w*.22,28);ctx.fillStyle='#c53d4b';ctx.fillText('รายจ่าย',w*.62,28);const base=h-45,barW=Math.min(100,w*.2);[[inc,w*.25,'#176b57'],[exp,w*.65,'#c53d4b']].forEach(([v,x,col])=>{let bh=(base-65)*v/max;ctx.fillStyle=col;ctx.fillRect(x,base-bh,barW,bh);ctx.fillStyle='#26342e';ctx.textAlign='center';ctx.font='15px system-ui';ctx.fillText(money(v),x+barW/2,base-bh-10)});ctx.strokeStyle='#dce4df';ctx.beginPath();ctx.moveTo(30,base);ctx.lineTo(w-25,base);ctx.stroke()}
+function deleteTx(i){if(confirm('ลบรายการนี้หรือไม่?')){data.transactions=data.transactions.filter(t=>t.id!==i);save()}}
+function deleteBudget(i){if(confirm('ลบงบประมาณนี้หรือไม่?')){data.budgets=data.budgets.filter(b=>b.id!==i);save()}}
+function deleteWallet(i){if(confirm('ลบกระเป๋านี้หรือไม่? ประวัติฝาก/ถอนของกระเป๋านี้จะถูกลบด้วย')){data.wallets=data.wallets.filter(w=>w.id!==i);data.moves=data.moves.filter(m=>m.walletId!==i);save()}}
+function csv(){const rows=[['วันที่','ประเภท','หมวดหมู่','รายละเอียด','จำนวนเงิน','กระเป๋าเงิน'],...data.transactions.map(t=>[t.date,t.type==='income'?'รายรับ':'รายจ่าย',t.category,t.note,t.amount,data.wallets.find(w=>w.id===t.walletId)?.name||''])];const content='\\ufeff'+rows.map(r=>r.map(x=>'"'+String(x??'').replace(/"/g,'""')+'"').join(',')).join('\\r\\n');download(content,'transactions.csv','text/csv;charset=utf-8')}
+function download(content,name,type){const blob=new Blob([content],{type}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;a.click();URL.revokeObjectURL(url)}
+$('txType').addEventListener('change',categoryOptions);$('dashMonth').value=monthNow;$('budgetMonth').value=monthNow;$('txDate').value=localDate(today);categoryOptions();
+document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.page').forEach(p=>p.classList.toggle('hidden',p.id!=='page-'+b.dataset.page));}));
+document.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click',()=>document.querySelector(`[data-page="${b.dataset.goto}"]`).click()));
+$('txForm').addEventListener('submit',e=>{e.preventDefault();const amount=+$('txAmount').value;if(amount<=0)return;data.transactions.push({id:id(),type:$('txType').value,amount,category:$('txCategory').value,date:$('txDate').value,note:$('txNote').value.trim(),walletId:$('txWallet').value,created:Date.now()});e.target.reset();$('txDate').value=localDate(today);categoryOptions();save()});
+$('budgetForm').addEventListener('submit',e=>{e.preventDefault();const b={id:id(),category:$('budgetCategory').value,amount:+$('budgetAmount').value,month:$('budgetMonth').value};const old=data.budgets.findIndex(x=>x.category===b.category&&x.month===b.month);if(old>=0)data.budgets[old]=b;else data.budgets.push(b);save();e.target.reset();$('budgetMonth').value=monthNow});
+$('walletForm').addEventListener('submit',e=>{e.preventDefault();data.wallets.push({id:id(),name:$('walletName').value.trim(),goal:+$('walletGoal').value||0,start:+$('walletStart').value||0,desc:$('walletDesc').value.trim()});e.target.reset();$('walletGoal').value='0';$('walletStart').value='0';save()});
+$('walletMoveForm').addEventListener('submit',e=>{e.preventDefault();const amount=+$('moveAmount').value,wid=$('moveWallet').value;if(!wid||amount<=0)return;if($('moveType').value==='withdraw'){const w=data.wallets.find(w=>w.id===wid);if(amount>walletBalance(w)){alert('ยอดเงินในกระเป๋าไม่เพียงพอ');return}}data.moves.push({id:id(),walletId:wid,type:$('moveType').value,amount,note:$('moveNote').value.trim(),date:localDate(today),created:Date.now()});e.target.reset();save()});
+$('dashMonth').addEventListener('change',render);$('searchTx').addEventListener('input',render);$('filterType').addEventListener('change',render);
+$('budgetCategory').innerHTML=expCats.map(c=>`<option>${c}</option>`).join('');
+$('exportBtn').addEventListener('click',csv);
+$('backupBtn').addEventListener('click',()=>download(JSON.stringify(data,null,2),'money-manager-backup.json','application/json'));
+$('importFile').addEventListener('change',async e=>{const f=e.target.files[0];if(!f)return;try{const parsed=JSON.parse(await f.text());if(!parsed||!Array.isArray(parsed.transactions)||!Array.isArray(parsed.wallets))throw Error();if(confirm('นำเข้าข้อมูลจะแทนที่ข้อมูลปัจจุบัน ต้องการดำเนินการหรือไม่?')){data={...blank(),...parsed};save();alert('นำเข้าข้อมูลสำเร็จ')}}catch(err){alert('ไฟล์ไม่ถูกต้องหรือไม่ใช่ไฟล์สำรองของแอปนี้')}e.target.value=''});
+$('clearBtn').addEventListener('click',()=>{if(confirm('ยืนยันลบข้อมูลทั้งหมด? แนะนำให้สำรองข้อมูลก่อน')){data=blank();save()}});
+let deferredPrompt;$('installBtn').addEventListener('click',async()=>{if(deferredPrompt){deferredPrompt.prompt();await deferredPrompt.userChoice;deferredPrompt=null;$('installBtn').classList.add('hidden')}else alert('หากเปิดจากเว็บที่รองรับ HTTPS ให้ใช้เมนูของเบราว์เซอร์ > เพิ่มลงในหน้าจอหลัก')});
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;$('installBtn').classList.remove('hidden')});
+if('serviceWorker' in navigator && location.protocol.startsWith('http'))window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
+render();
+</script>
+</body></html>
